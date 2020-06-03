@@ -26,7 +26,8 @@ router.post('/notes/new-note',async(req,res)=>{
     }else{
         const newNote = new Note({title,description})
         await  newNote.save();
-        res.redirect('/notes')
+        req.flash('success_msg','Note Added Successfully');
+        res.redirect('/notes');
     }
 })
 
@@ -34,15 +35,42 @@ router.get('/notes', async (req,res)=>{
     await Note.find()
     .then( doc =>{
         const body = {
-            notes: doc.map(documento => {
-                return {
-                    title: documento.title,
-                    description: documento.description
-                }
-            })
+            nota: doc.map(data => {
+                return{
+                title: data.title,
+                description: data.description,
+                _id: data._id
+            }}),
+        }        
+        res.render('notes/all-notes', {notes: body.nota});
+    })    
+})
+
+router.get('/notes/edit/:id', async (req,res)=>{
+    await Note.findById(req.params.id)
+    .then( doc =>{
+        const body = {
+            title: doc.title,
+            description: doc.description,
+            _id: doc._id
         }
-        res.render('notes/all-notes',{ notes: body.notes });
-    })
+        //console.log(body);
+        res.render('notes/edit-note', { body });
+    })  
+})
+
+router.put('/notes/edit-note/:id', async (req,res)=>{
+    const {title}  = req.body;   
+
+    await Note.findByIdAndUpdate(req.params.id,{title: title[0], description: title[1]});
+    req.flash('success_msg','Note Updated Success');
+    res.redirect('/notes');
+})
+
+router.delete('/notes/delete/:id',async (req,res)=>{
+    await Note.findByIdAndDelete(req.params.id)
+    req.flash('success_msg','Note Deleted Success');
+    res.redirect('/notes')
 })
 
 module.exports = router;
