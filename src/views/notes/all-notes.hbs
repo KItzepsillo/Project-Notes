@@ -1,0 +1,14 @@
+<div class="row">
+    {{#each notes}}
+    <div class="col-md-6">
+        <div class="card">
+            <card-body>
+                <h4 class= "card-title">
+                    {{this.title}} <a href="#"><i class="fas fa-edit"></i></a>
+                </h4>
+                <p>{{ this.description }}</p>
+            </card-body>
+        </div>
+    </div>
+    {{/each}}
+</div>
