@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 
 const Note = require('../models/Note');
+const { isAuthenticaded } = require('../helpers/auth');
 
-router.get('/notes/add',(req,res)=>{
+router.get('/notes/add', isAuthenticaded, (req,res)=>{
     res.render('notes/new-note');
 })
 
-router.post('/notes/new-note',async(req,res)=>{
+router.post('/notes/new-note', isAuthenticaded, async(req,res)=>{
     const { title, description } = req.body;
     
     const errors = []
@@ -25,14 +26,15 @@ router.post('/notes/new-note',async(req,res)=>{
         });
     }else{
         const newNote = new Note({title,description})
+        newNote.user = req.user.id;
         await  newNote.save();
         req.flash('success_msg','Note Added Successfully');
         res.redirect('/notes');
     }
 })
 
-router.get('/notes', async (req,res)=>{
-    await Note.find()
+router.get('/notes', isAuthenticaded,  async (req,res)=>{
+    await Note.find({user: req.user.id})
     .then( doc =>{
         const body = {
             nota: doc.map(data => {
@@ -46,7 +48,7 @@ router.get('/notes', async (req,res)=>{
     })    
 })
 
-router.get('/notes/edit/:id', async (req,res)=>{
+router.get('/notes/edit/:id', isAuthenticaded, async (req,res)=>{
     await Note.findById(req.params.id)
     .then( doc =>{
         const body = {
@@ -59,7 +61,7 @@ router.get('/notes/edit/:id', async (req,res)=>{
     })  
 })
 
-router.put('/notes/edit-note/:id', async (req,res)=>{
+router.put('/notes/edit-note/:id', isAuthenticaded, async (req,res)=>{
     const {title}  = req.body;   
 
     await Note.findByIdAndUpdate(req.params.id,{title: title[0], description: title[1]});
@@ -67,7 +69,7 @@ router.put('/notes/edit-note/:id', async (req,res)=>{
     res.redirect('/notes');
 })
 
-router.delete('/notes/delete/:id',async (req,res)=>{
+router.delete('/notes/delete/:id', isAuthenticaded, async (req,res)=>{
     await Note.findByIdAndDelete(req.params.id)
     req.flash('success_msg','Note Deleted Success');
     res.redirect('/notes')
