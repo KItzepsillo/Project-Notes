@@ -25,7 +25,8 @@ server.set('view engine','.hbs');
 
 
 //Middlewares
-server.use(express.urlencoded({extended: true}))
+server.use(express.urlencoded({extended: false}))
+server.use(express.json({ extended: true }));
 server.use(methodOverride('_method'));
 server.use(session({
     secret: 'mysecretapp',
